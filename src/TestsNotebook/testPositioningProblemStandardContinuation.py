@@ -9,11 +9,11 @@ solutionSpaceDimension = 9
 
 # Instantiate the SE(3) manifold
 euclideanSpace = Euclidean(3)
-rotationSpace = Rotations(3)
-specialEuclideanGroup = Product((rotationSpace, euclideanSpace))
+SO3 = Rotations(3)
+specialEuclideanGroup = Product((SO3, euclideanSpace))
 
 # Instantiate the solution space
-solutionSpace = Product((rotationSpace, euclideanSpace, euclideanSpace))
+solutionSpace = Product((SO3, euclideanSpace, euclideanSpace))
 
 # Dimension of the parameter space
 parameterSpaceDimension = 2
@@ -22,7 +22,7 @@ parameterSpaceDimension = 2
 parameterSpace = Euclidean(2)
 
 # Instantiate the global manifold
-product = Product((rotationSpace, euclideanSpace, euclideanSpace, parameterSpace))
+product = Product((SO3, euclideanSpace, euclideanSpace, parameterSpace))
 
 
 def rho_z(theta):
@@ -77,16 +77,30 @@ def tupleRepresentationOfSE3Element(element):
 
 def cost(S):
     I = np.eye(4)
-    phi = matrixRepresentationOfSE3Element((S[0], S[1]))
+    phi = matrixRepresentationOfSE3Element(S[0], S[1])
     u = phi @ C(S[2][0], S[3][1]) @ rho_z(0.5 * np.pi - S[3][0]) @ p1Inv - I
     v = phi @ C(S[2][1], S[3][1]) @ rho_z(- S[2][2]) @ p2Inv - I
 
     return np.trace(u.T @ u) + np.trace(v.T @ v)
 
+def Skew(A):
+    return 0.5 * (A - A.T)
+
+def SkewMat(w):
+    return np.array([[0., -w[2], w[1]], [w[2], 0., -w[0]], [-w[1], w[0], 0.]], dtype=float)
+
+def diffProj(x, z, v):
+    return product.proj(x, [x[0] @ Skew(z[0].T @ v[0]) + z[0] @ Skew(x[0].T @ v[0]), np.zeros(x[1].shape), np.zeros(x[2].shape), np.zeros(x[3].shape)])
+
+def hess(x, z):
+    egrad = problem.egrad(x)
+    ehess = problem.ehess(x, [SO3.tangent2ambient(x[0], z[0]), z[1], z[2], z[3]])
+    return product.proj(x, ehess) + diffProj(x, [SO3.tangent2ambient(x[0], z[0]), z[1], z[2], z[3]], egrad)
+
 from pymanopt.core.problem import Problem
 
 # Instantiate the problem
-problem = Problem(product, cost=cost)
+problem = Problem(product, cost=cost, hess=hess)
 
 from Continuation.StandardContinuation.StepSizeAdaptiveContinuation import StepSizeAdaptiveContinuation
 

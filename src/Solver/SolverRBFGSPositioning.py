@@ -6,16 +6,19 @@ class SolverRBFGS:
     ArmijoPromisedDecreaseScaling = 1e-4
     ArmijoStepSizeContraction = 0.7
     ArmijoInitialStepSize = 1
-    ObjectiveFunctionTolerance = 1e-12
-    GradientNormTolerance = 1e-6
+    ObjectiveFunctionTolerance = 1e-14
+    GradientNormTolerance = 1e-10
+    SE3Dimension = 6
 
-    def __init__(self, problem):
+    def __init__(self, problem, normalized = False):
         if not isinstance(problem, Problem):
             raise ValueError('The problem must be an instance of pymanopt.core.problem.Problem')
 
         self._solutionSpace = problem.manifold
         self._objectiveFunction = problem.cost
         self._gradient = problem.grad
+
+        self.normalized = normalized
 
     def ContinueOptimization(self, currentPoint, iterations):
         return (self._solutionSpace.norm(currentPoint, self._gradient(currentPoint)) > self.GradientNormTolerance
@@ -53,7 +56,7 @@ class SolverRBFGS:
             iterations = iterations + 1
 
             stepSize = self.ArmijoLineSearch(currentPoint, currentGradient, updateDirection)
-            newPoint = self._solutionSpace.retr(currentPoint, stepSize * updateDirection)
+            newPoint = self._solutionSpace.exp(currentPoint, stepSize * updateDirection)
 
             previousGradient = currentGradient
             newGradient = self._gradient(newPoint)
@@ -70,8 +73,8 @@ class SolverRBFGS:
 
             currentGradient = newGradient
 
-            #print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
-            #print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
+            print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
+            print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
 
         print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
         print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
@@ -88,7 +91,11 @@ class SolverRBFGS:
         sk = self.ConvertToVectorInRn(previousSearchDirection)
 
         #For the moment
-        metricMatrix = np.diag(np.array([2., 2., 2., 1., 1., 1., 1., 1., 1.]))
+        if self.normalized:
+            metricMatrix = np.eye(int(self._solutionSpace.dim))
+        else:
+            metricMatrix = np.diag(np.concatenate((np.array([2., 2., 2., 1., 1., 1.]),
+                                                   np.ones(int(self._solutionSpace.dim) - self.SE3Dimension))))
 
         def inner(u, v):
             return np.inner(u, metricMatrix @ v)
@@ -100,8 +107,8 @@ class SolverRBFGS:
 
         intermediateScalar = inner(sk, yk) + inner(yk , oldInverseHessian @ yk)
 
-        #if skTGyk < 1e-9 and np.linalg.norm(oldInverseHessian - np.eye(9)) >= 1e-14 :
-        #    return np.eye(9)
+        if skTGyk < 1e-12:# and np.linalg.norm(oldInverseHessian - np.eye(int(self._solutionSpace.dim))) >= 1e-14 :
+            return np.eye(int(self._solutionSpace.dim))
 
         return oldInverseHessian \
                + np.outer(sk, sk.T @ metricMatrix) * intermediateScalar / (skTGyk * skTGyk)\
@@ -109,12 +116,17 @@ class SolverRBFGS:
                   + np.outer(sk, yk.T @ metricMatrix) @ oldInverseHessian) / skTGyk
 
     def ConvertToVectorInRn(self, tangentVector):
-        vector = [self.InvSkew(tangentVector[0]) , tangentVector[1], tangentVector[2]]
+        if self.normalized:
+            return np.concatenate((self.InvSkew(tangentVector[0]) * np.sqrt(2.) , tangentVector[1], tangentVector[2]))
+        else:
+            return np.concatenate((self.InvSkew(tangentVector[0]), tangentVector[1], tangentVector[2]))
 
-        return np.array(vector).flatten()
 
     def ConvertToTangentVector(self, currentPoint, vector):
-        return self._solutionSpace.proj(currentPoint, (self.Skew(vector[:3]), vector[3:6], vector[6:]))
+        if self.normalized:
+            return self._solutionSpace.proj(currentPoint, (self.Skew(vector[:3]) / np.sqrt(2.), vector[3:6], vector[6:]))
+        else:
+            return self._solutionSpace.proj(currentPoint, (self.Skew(vector[:3]), vector[3:6], vector[6:]))
 
     def Skew(self, w):
         return np.array([[0., -w[2], w[1]], [w[2], 0., -w[0]], [-w[1], w[0], 0.]])

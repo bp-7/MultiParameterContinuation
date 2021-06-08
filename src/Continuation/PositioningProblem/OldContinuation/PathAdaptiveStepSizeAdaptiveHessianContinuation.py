@@ -22,28 +22,22 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
                  problem,
                  initialSolution,
                  initialParameter,
-                 targetParameter,
-                 typeOfConstraint,
-                 methodForPerturbation):
+                 targetParameter):
 
         super().__init__(problem, initialSolution, initialParameter, targetParameter)
 
         self._currentStepSize = self.InitialStepSize
 
-        self._methodForPerturbation = methodForPerturbation
-
-        self._typeOfConstraint = typeOfConstraint
         self._currentParameterPerturbation = None
         self._currentSolutionPerturbation = None
 
-        # For the moment, but need to change
-        self._solutionSpaceMetricMatrix = ConstructMetricMatrixForBergerManifold(int(self.SolutionSpace.dim) - 6)
+        self.IsBasisNormalized = False
 
     def GetNextParameter(self):
         return self._currentParameter + self._currentStepSize * self._currentParameterPerturbation
 
     def GetNextApproximate(self):
-        return self.SolutionSpace.retr(self._currentSolution, self._currentStepSize * self._currentSolutionPerturbation)
+        return self.SolutionSpace.exp(self._currentSolution, self._currentStepSize * self._currentSolutionPerturbation)
 
     def GetNextContinuationArgument(self):
 
@@ -81,8 +75,9 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
         lowBound, highBound = 0.0, self._currentStepSize
 
         def potentialSolutionCurvePoint(newStepSize):
-            return tuple(self.SolutionSpace.retr(self._currentSolution, newStepSize * self._currentSolutionPerturbation)) + \
-                   (self._currentParameter + newStepSize * self._currentParameterPerturbation, )
+            currentSolutionPerturbation = self.ChangeInNonNormalizedBasis(self._currentSolutionPerturbation)
+            return list(self.SolutionSpace.exp(self._currentSolution, newStepSize * currentSolutionPerturbation)) + \
+                   [self._currentParameter + newStepSize * self._currentParameterPerturbation]
 
         def potentialObjectiveFunctionValue(newStepSize):
             return self._objectiveFunction(potentialSolutionCurvePoint(newStepSize))
@@ -136,11 +131,7 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
 
             correctorProblem = Problem(self.SolutionSpace, costForFixedParameter)
 
-            corrector = SolverRBFGS(correctorProblem)
-            #from pymanopt.solvers.trust_regions import TrustRegions
-            #corrector = TrustRegions()
-
-            #potentialNextSolution = corrector.solve(correctorProblem, x=potentialNextApproximate)
+            corrector = SolverRBFGS(correctorProblem, self.IsBasisNormalized)
 
             (potentialNextSolution, self._approximateInverseHessian, RBFGSIters) = corrector.SearchSolution(potentialNextApproximate, self._approximateInverseHessian)
 
@@ -202,16 +193,16 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
         self._currentStepSize = 1.0
 
         if self._objectiveFunction(
-                tuple(self.SolutionSpace.retr(self._currentSolution, self._currentSolutionPerturbation)) \
+                tuple(self.SolutionSpace.exp(self._currentSolution, self._currentSolutionPerturbation)) \
                 + (self._currentParameter + self._currentParameterPerturbation,)) > self.ObjectivePredictionTolerance:
 
             potentialStepSize = self.ChooseLargestStepSizeSatisfyingRequirements()
-            potentialParameterPerturbation = self.chooseParameterPerturbationOnEllipsoid(self.hessianG, self.ObjectivePredictionTolerance)
+            potentialParameterPerturbation = self.chooseParameterPerturbationOnEllipsoid(self.hessianG, np.sqrt(self.ObjectivePredictionTolerance))
             potentialSolutionPerturbation = self.ConvertToTangentVectorOnSolutionSpace(self._currentSolution,
                                                                                        self.DeterminePerturbationInSolutionSpace(
                                                                                            potentialParameterPerturbation))
             if self._objectiveFunction(
-                tuple(self.SolutionSpace.retr(self._currentSolution, potentialSolutionPerturbation)) \
+                tuple(self.SolutionSpace.exp(self._currentSolution, potentialSolutionPerturbation)) \
                 + (self._currentParameter + potentialParameterPerturbation,)) > self.ObjectivePredictionTolerance:
 
                 tempParameterPerturbation = self._currentParameterPerturbation
@@ -248,3 +239,6 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
     def Skew(self, w):
         #return np.array([np.cross(w, np.array([1., 0, 0])), np.cross(w, np.array([0, 1., 0])), np.cross(w, np.array([0, 0, 1.]))], dtype=object).T
         return np.array([[0., -w[2], w[1]], [w[2], 0., -w[0]], [-w[1], w[0], 0.]], dtype=float)
+
+    def ChangeInNonNormalizedBasis(self, vector):
+        return [vector[0] * np.sqrt(2), vector[1], vector[2], vector[3]]

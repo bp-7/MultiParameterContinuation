@@ -1,12 +1,9 @@
 import autograd.numpy as np
 
 from Continuation.PositioningProblem.ContinuationPositioning import AbstractContinuationPositioning
-from Continuation.Helpers.AssembleMatrices import RepresentSquareOperatorInTotalBergerBasis,\
-    RepresentSquareOperatorInTotalNormalizedBergerBasis, ConstructMetricMatrixForBergerManifold
 
 from pymanopt.core.problem import Problem
 from pymanopt.manifolds import Sphere
-from pymanopt.manifolds import Euclidean
 from pymanopt.solvers import SteepestDescent
 
 from Solver.SolverRBFGSPositioning import SolverRBFGS
@@ -23,51 +20,43 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
                  problem,
                  initialSolution,
                  initialParameter,
-                 targetParameter,
-                 typeOfConstraint,
-                 methodForPerturbation):
+                 targetParameter):
 
         super().__init__(problem, initialSolution, initialParameter, targetParameter)
 
         self._currentStepSize = self.InitialStepSize
 
-        self._methodForPerturbation = methodForPerturbation
+        self.currentPoint = list(self._currentSolution) + [self._currentParameter]
 
-        self._typeOfConstraint = typeOfConstraint
         self._currentParameterPerturbation = None
         self._currentSolutionPerturbation = None
 
-        # For the moment, but need to change
-        self._solutionSpaceMetricMatrix = ConstructMetricMatrixForBergerManifold(int(self.SolutionSpace.dim) - 6)
+        self.hessianMatrix = None
+        self.hessianSolutionMatrix = None
+        self.hessianMixteMatrix = None
+        self.inverseHessianSolutionMatrix = None
 
     def GetNextParameter(self):
         return self._currentParameter + self._currentStepSize * self._currentParameterPerturbation
 
     def GetNextApproximate(self):
-        return self.SolutionSpace.retr(self._currentSolution, self._currentStepSize * self._currentSolutionPerturbation)
+        return self.SolutionSpace.exp(self._currentSolution, self._currentStepSize * self._currentSolutionPerturbation)
 
     def GetNextContinuationArgument(self):
 
-        currentPoint = list(self._currentSolution) + [self._currentParameter]
+        self.currentPoint = list(self._currentSolution) + [self._currentParameter]
 
-        hessianMatrix = RepresentSquareOperatorInTotalBergerBasis(self._hessian,
-                                                                  self.ProductManifold,
-                                                                  currentPoint)
+        self.hessianMatrix = self.ExpressHessianMatrixInSuitableBasis()
+
         solutionSpaceDimension = int(self.SolutionSpace.dim)
 
-        self.hessianSolutionMatrix = hessianMatrix[:solutionSpaceDimension, :solutionSpaceDimension]
+        self.hessianSolutionMatrix = self.hessianMatrix[:solutionSpaceDimension, :solutionSpaceDimension]
 
-        self.hessianMixteMatrix = hessianMatrix[:solutionSpaceDimension, solutionSpaceDimension:]
-
-        self.hessianParameterMatrix = hessianMatrix[solutionSpaceDimension:, solutionSpaceDimension:]
+        self.hessianMixteMatrix = self.hessianMatrix[:solutionSpaceDimension, solutionSpaceDimension:]
 
         self.inverseHessianSolutionMatrix = np.linalg.inv(self.hessianSolutionMatrix)
 
-        self.hessianG = self.hessianParameterMatrix + self.hessianMixteMatrix.T @ self.inverseHessianSolutionMatrix @ self.hessianMixteMatrix
-
-        temp = self.inverseHessianSolutionMatrix @ self.hessianMixteMatrix
-
-        self._parameterSpaceMetricMatrix = temp.T @ self._solutionSpaceMetricMatrix @ temp
+        self._parameterSpaceMetricMatrix = self.DetermineMetricMatrix()
 
         self.DeterminePerturbationsInTangentSpaces()
 
@@ -79,12 +68,12 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
         print("----- Step Size Selection-----\n")
         print("Initial stepSize = " + str(self._currentStepSize) + "\n")
 
-        newStepSize = self._currentStepSize
-        lowBound, highBound = 0.0, self._currentStepSize
+        lowBound, highBound = 0.0, 1.0
+        newStepSize = 1.0
 
         def potentialSolutionCurvePoint(newStepSize):
-            return tuple(self.SolutionSpace.retr(self._currentSolution, newStepSize * self._currentSolutionPerturbation)) + \
-                   (self._currentParameter + newStepSize * self._currentParameterPerturbation, )
+            return list(self.SolutionSpace.exp(self._currentSolution, newStepSize * self._currentSolutionPerturbation)) + \
+                   [self._currentParameter + newStepSize * self._currentParameterPerturbation]
 
         def potentialObjectiveFunctionValue(newStepSize):
             return self._objectiveFunction(potentialSolutionCurvePoint(newStepSize))
@@ -111,6 +100,7 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
                     lowBound = newStepSize
                 else:
                     highBound = newStepSize
+                    newStepSize = lowBound
 
         return newStepSize
 
@@ -139,15 +129,11 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
             correctorProblem = Problem(self.SolutionSpace, costForFixedParameter)
 
             corrector = SolverRBFGS(correctorProblem)
-            #from pymanopt.solvers.trust_regions import TrustRegions
-            #corrector = TrustRegions()
-
-            #potentialNextSolution = corrector.solve(correctorProblem, x=potentialNextApproximate)
 
             (potentialNextSolution, self._approximateInverseHessian, RBFGSIters) = corrector.SearchSolution(potentialNextApproximate, self._approximateInverseHessian)
 
             totalRBFGSIters += RBFGSIters
-            if self._objectiveFunction(tuple(potentialNextSolution) +  (potentialNextParameter,)) <= 1e-7:
+            if self._objectiveFunction(list(potentialNextSolution) +  [potentialNextParameter]) <= 1e-9:
                 print("######## ULTIMATUM SUCCESS ########\n")
 
                 return potentialNextContinuationArgument, tuple(potentialNextSolution) +  (potentialNextParameter, ), totalRBFGSIters
@@ -157,6 +143,7 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
         return None
 
     def chooseParameterPerturbationOnEllipsoid(self, metric, magnitude):
+        # take Cholesky factor
         choleskyFactor = np.linalg.cholesky(metric)
         inverseCholeskyFactor = np.linalg.inv(choleskyFactor)
 
@@ -183,6 +170,7 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
 
         xStart = (1.0 / perturbationMagnitude) * choleskyFactor.T @ deltaParameter
         xStartNormalized = xStart / np.linalg.norm(xStart)
+
         if unitSphere.norm(xStartNormalized, problem.grad(xStartNormalized)) <= 1e-15:
             return perturbationMagnitude * inverseCholeskyFactor.T @ xStartNormalized
 
@@ -196,65 +184,17 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
 
         return newPerturbation
 
+    def DetermineMetricMatrix(self):
+        raise NotImplementedError
+
     def DeterminePerturbationsInTangentSpaces(self):
-        self._currentParameterPerturbation = self.FinalParameter - self._currentParameter
-
-        self._currentSolutionPerturbation = self.ConvertToTangentVectorOnSolutionSpace(self._currentSolution,
-                                                                                         self.DeterminePerturbationInSolutionSpace(self._currentParameterPerturbation))
-        self._currentStepSize = 1.0
-
-        if self._objectiveFunction(
-                tuple(self.SolutionSpace.retr(self._currentSolution, self._currentSolutionPerturbation)) \
-                + (self._currentParameter + self._currentParameterPerturbation,)) > self.ObjectivePredictionTolerance:
-
-            potentialStepSize = self.ChooseLargestStepSizeSatisfyingRequirements()
-            self._perturbationMagnitude = potentialStepSize \
-                                          * self.SolutionSpace.norm(self._currentSolution,
-                                                                    self._currentSolutionPerturbation)
-
-            potentialParameterPerturbation = self.chooseParameterPerturbationOnEllipsoid(self._parameterSpaceMetricMatrix, self._perturbationMagnitude)
-            potentialSolutionPerturbation = self.ConvertToTangentVectorOnSolutionSpace(self._currentSolution,
-                                                                                         self.DeterminePerturbationInSolutionSpace(potentialParameterPerturbation))
-
-            if self._objectiveFunction(
-                    tuple(self.SolutionSpace.retr(self._currentSolution, potentialSolutionPerturbation)) \
-                    + (self._currentParameter + potentialParameterPerturbation,)) > self.ObjectivePredictionTolerance:
-
-                tempParameterPerturbation = self._currentParameterPerturbation
-                tempSolutionPerturbation = self._currentSolutionPerturbation
-                tempStepSize = potentialStepSize
-
-                self._currentParameterPerturbation = potentialParameterPerturbation
-                self._currentSolutionPerturbation = potentialSolutionPerturbation
-
-                newStepSize = self.ChooseLargestStepSizeSatisfyingRequirements()
-
-                if np.linalg.norm(
-                        self._currentParameter + newStepSize * self._currentParameterPerturbation - self.FinalParameter) \
-                        <= np.linalg.norm(
-                    self._currentParameter + tempStepSize * tempParameterPerturbation - self.FinalParameter):
-                    self._currentStepSize = newStepSize
-                else:
-                    self._currentParameterPerturbation = tempParameterPerturbation
-                    self._currentSolutionPerturbation = tempSolutionPerturbation
-                    self._currentStepSize = tempStepSize
-            else:
-                self._currentParameterPerturbation = potentialParameterPerturbation
-                self._currentSolutionPerturbation = potentialSolutionPerturbation
-                self._currentStepSize = 1.0
-
-    def DetermineSolutionFromHessianMetric(self):
-        return "bla"
-
+        raise NotImplementedError
 
     def ConvertToTangentVectorOnSolutionSpace(self, currentPoint, vector):
-        return self.SolutionSpace.proj(currentPoint, (
-            self.Skew(vector[:3]), np.array(vector[3:6]), np.array(vector[6:])))
+        raise NotImplementedError
 
     def ConvertToTangentVector(self, currentPoint, vector):
-        return self.ProductManifold.proj(currentPoint, (
-        self.Skew(vector[:3]), np.array(vector[3:6]), np.array(vector[6:9]), np.array(vector[9:])))
+        raise NotImplementedError
 
-    def Skew(self, w):
-        #return np.array([np.cross(w, np.array([1., 0, 0])), np.cross(w, np.array([0, 1., 0])), np.cross(w, np.array([0, 0, 1.]))], dtype=object).T
-        return np.array([[0., -w[2], w[1]], [w[2], 0., -w[0]], [-w[1], w[0], 0.]], dtype=float)
+    def ExpressHessianMatrixInSuitableBasis(self):
+        raise NotImplementedError

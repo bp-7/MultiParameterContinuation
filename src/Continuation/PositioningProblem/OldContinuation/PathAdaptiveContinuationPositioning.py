@@ -45,7 +45,7 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
         return self._currentParameter + self._currentStepSize * self._currentParameterPerturbation
 
     def GetNextApproximate(self):
-        return self.SolutionSpace.retr(self._currentSolution, self._currentStepSize * self._currentSolutionPerturbation)
+        return self.SolutionSpace.exp(self._currentSolution, self._currentStepSize * self._currentSolutionPerturbation)
 
     def GetNextContinuationArgument(self):
 
@@ -105,7 +105,7 @@ class PathAdaptiveMultiParameterContinuation(AbstractContinuationPositioning):
         newStepSize = self.InitialStepSize
 
         def potentialSolutionCurvePoint(newStepSize):
-            return tuple(self.SolutionSpace.retr(self._currentSolution, newStepSize * self._currentSolutionPerturbation)) + \
+            return tuple(self.SolutionSpace.exp(self._currentSolution, newStepSize * self._currentSolutionPerturbation)) + \
                    (self._currentParameter + self._currentStepSize * self._currentParameterPerturbation, )
 
         def potentialObjectiveFunctionValue(newStepSize):

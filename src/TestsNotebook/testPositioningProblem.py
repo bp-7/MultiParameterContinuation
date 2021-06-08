@@ -49,11 +49,11 @@ def tau_y(y):
 def C(t, a):
     return tau_y(a * t ** 2) @ tau_x(t) @ rho_z(np.arctan(2 * a * t))
 
-startingTheta = 45. * np.pi / 180.
+startingTheta = (45.) * np.pi / 180.
 startingCoefficient = 1.
 
-finalTheta =  (180 - 81) * np.pi / 180.
-finalCoefficient = -1.5
+finalTheta =  0.24235328104536874 #1.1#(70) * np.pi / 180.
+finalCoefficient = 0.16422448979591836
 
 p1 = tau_x(-0.5)
 p2 = tau_x(0.5)
@@ -61,11 +61,20 @@ p2 = tau_x(0.5)
 p1Inv = np.linalg.inv(p1)
 p2Inv = np.linalg.inv(p2)
 
-initialSolution = (np.eye(3),
+initialSolution = [np.eye(3),
                    np.array([0., -0.25, 0.]),
-                   np.array([-0.5, 0.5, 45. * np.pi / 180.]))
+                   np.array([-0.5, 0.5, 45. * np.pi / 180.])]
+
+#initialSolution = solutionSpace.exp(_initialSolution, 1e-7 * solutionSpace.randvec(_initialSolution))
+
+#initialSolution = [np.array([[ 0.9332623559555006, -0.35919545508871464,  0.        ],
+#                     [ 0.35919545508871464,  0.9332623559555006,  0.        ],
+#                     [ 0.        ,  0.        ,  1.        ]]),
+#                     np.array([ 0.2528757691106841, -0.38914481919722627,  0.        ]),
+#                     np.array([-0.5628515635950829,  0.3704107923604174,  1.3445029385189626])]
 
 initialParameter = np.array([startingTheta, startingCoefficient])
+#initialParameter = _initialParameter + 1e-7 * parameterSpace.randvec(_initialParameter)
 targetParameter = np.array([finalTheta, finalCoefficient])
 
 def matrixRepresentationOfSE3Element(rotation, translation):
@@ -118,23 +127,37 @@ def hess(x, z):
     ehess = problem.ehess(x, [SO3.tangent2ambient(x[0], z[0]), z[1], z[2], z[3]])
     return product.proj(x, ehess) + diffProj(x, [SO3.tangent2ambient(x[0], z[0]), z[1], z[2], z[3]], egrad)
 
+
 from pymanopt.core.problem import Problem
 
 # Instantiate the problem
 problem = Problem(product, cost=cost, hess=hess)
 
-from Continuation.PositioningProblem.PathAdaptiveStepSizeAdaptiveContinuation import PathAdaptiveMultiParameterContinuation
-#from Continuation.PositioningProblem.PathAdaptiveStepSizeAdaptiveHessianContinuation import PathAdaptiveMultiParameterContinuation
+from Continuation.PositioningProblem.StepSizeAdaptiveContinuationStraightLine import StepSizeAdaptiveContinuation
+from Continuation.PositioningProblem.PathAdaptiveContinuationApproximateLength import PathAdaptiveContinuationApproximateLength
+from Continuation.PositioningProblem.PathAdaptiveContinuationSecondOrderApproximation import PathAdaptiveContinuationSecondOrderApproximation
 
 # Instantiate continuation object
-continuation = PathAdaptiveMultiParameterContinuation(problem,
-                                                      initialSolution,
-                                                      initialParameter,
-                                                      targetParameter,
-                                                      'ellipsoid',
-                                                      'naive')
 
-results, parameterSpaceMetrics, perturbationMagnitudes, iterations, solved = continuation.Traverse()
+continuation = StepSizeAdaptiveContinuation(problem,
+                                            initialSolution,
+                                            initialParameter,
+                                            targetParameter)
+
+continuation3 = PathAdaptiveContinuationApproximateLength(problem,
+                                                          initialSolution,
+                                                          initialParameter,
+                                                          targetParameter)
+
+continuation2 = PathAdaptiveContinuationSecondOrderApproximation(problem,
+                                                                initialSolution,
+                                                                initialParameter,
+                                                                targetParameter)
+
+#results, parameterSpaceMetrics, perturbationMagnitudes, iterations, solved = continuation.Traverse()
+#results3, parameterSpaceMetrics3, perturbationMagnitudes3, iterations3, solved3 = continuation3.Traverse()
+results2, parameterSpaceMetrics2, perturbationMagnitudes2, iterations2, solved2 = continuation2.Traverse()
+
 
 
 ##########################################################################
@@ -244,10 +267,7 @@ class SubplotAnimation(animation.TimedAnimation):
     def draw_curve(self, framedata):
         a = self.yParameters[framedata]
 
-        if framedata == 0:
-            solution = self.solutions[0][0]
-        else:
-            solution = self.solutions[framedata]
+        solution = self.solutions[framedata]
 
         rotationMatrix = solution[0]
         translationVector = solution[1]
@@ -296,9 +316,9 @@ class SubplotAnimation(animation.TimedAnimation):
         plt.show()
 
 
-ani = SubplotAnimation(results,
-                       parameterSpaceMetrics,
-                       perturbationMagnitudes,
+ani = SubplotAnimation(results2,
+                       parameterSpaceMetrics2,
+                       perturbationMagnitudes2,
                        targetParameter)
 
 ani.show()

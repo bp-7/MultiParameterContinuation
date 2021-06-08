@@ -42,6 +42,8 @@ class AbstractContinuationPositioning:
         self._currentSolution = initialSolution
         self._currentParameter = initialParameter
 
+        self.IsBasisNormalized = False
+
         def costFunctionForFixedParameter(S):
             A = list(S)
             A.append(self._currentParameter)
@@ -65,7 +67,7 @@ class AbstractContinuationPositioning:
 
     def UpdateContinuationInformation(self, newlyFoundApproximate):
         self._currentContinuationArgument = self._nextContinuationArgument
-        self._currentApproximate = newlyFoundApproximate[:3]
+        self._currentSolution = newlyFoundApproximate[:3]
         self._currentParameter = newlyFoundApproximate[-1]
 
         self._nextContinuationArgument = self.GetNextContinuationArgument()
@@ -88,7 +90,7 @@ class AbstractContinuationPositioning:
     def Traverse(self):
 
         iterations = 0
-        solutionCurve = [(0, (self._currentSolution, self._currentParameter))]
+        solutionCurve = [(0, list(self._currentSolution) + [self._currentParameter])]
 
         solved = True
         totalRBFGSIterations = 0
@@ -114,12 +116,13 @@ class AbstractContinuationPositioning:
                 return self._objectiveFunction(A)
 
             correctorProblem = Problem(self.SolutionSpace, costForFixedParameter)
+            #from pymanopt.solvers.trust_regions import TrustRegions
 
-            from pymanopt.solvers.trust_regions import TrustRegions
             #corrector = TrustRegions()
-            corrector = SolverRBFGS(correctorProblem)
-            (self._currentSolution, self._approximateInverseHessian, RBFGSIters) = corrector.SearchSolution(self._nextApproximate, self._approximateInverseHessian)
+
             #self._currentSolution = corrector.solve(correctorProblem, x=self._nextApproximate)
+            corrector = SolverRBFGS(correctorProblem, self.IsBasisNormalized)
+            (self._currentSolution, self._approximateInverseHessian, RBFGSIters) = corrector.SearchSolution(self._nextApproximate, self._approximateInverseHessian)
 
             totalRBFGSIterations += RBFGSIters
 

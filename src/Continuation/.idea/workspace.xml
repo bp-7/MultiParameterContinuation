@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="f4bbff35-ca04-4b09-a879-5099a7283e14" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/PositioningProblem/OldContinuation/PathAdaptiveStepSizeAdaptiveContinuation2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationApproximateLength.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationSecondOrderApproximation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PositioningProblem/StepSizeAdaptiveContinuationStraightLine.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Derivatives/Parabola.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Helpers/BasicSE3Transformations.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Helpers/BasicSe3Transformation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Helix.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Parabola.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Torus.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../TestsNotebook/testReliefTwoCurves.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/CylinderVisualization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/SurfaceVisualization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/TorusVisualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Helpers/AssembleMatrices.py" beforeDir="false" afterPath="$PROJECT_DIR$/Helpers/AssembleMatrices.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/ContinuationPositioning.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/ContinuationPositioning.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationPositioning.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/OldContinuation/PathAdaptiveContinuationPositioning.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveContinuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveContinuation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveHessianContinuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/OldContinuation/PathAdaptiveStepSizeAdaptiveHessianContinuation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Solver/SolverRBFGSPositioning.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Solver/SolverRBFGSPositioning.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/Debugging.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/Debugging.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/FeasableMap.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/FeasableMap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblem.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblem.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblemStandardContinuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblemStandardContinuation.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1t1UZ4u1ebHZTD7RmhUPWW1QKrK" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f4bbff35-ca04-4b09-a879-5099a7283e14" name="Default Changelist" comment="" />
+      <created>1621936140900</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1621936140900</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
