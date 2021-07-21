@@ -15,7 +15,9 @@ You will need to download the library `pymanopt` which can be found [here](https
 
 * The folder `Continuation` contains all the files required to perform the multiparameter continuation. The prediction on the solution manifold's tangent space is performed either using the hessian of a related cost function, or the differential of the system (please refer to PdM report for more details). The class `PathAdaptiveMultiParameterContinuation` which performs the ellipsoid method can be found in the file `Continuation\PositioningProblem\PerturbationWithDifferential\PathAdaptiveContinuation.py`.
 * The folder `Helpers` contains basic SE(3) transformations as well as methods to express linear operators in basis of SE(3) x R^N.
-* Step-by-step bullets
+* The folder `PositioiningProblems` defines the different studied problems, as well as a related cost function and the system's differential for each problem.
+* The folder `NumericalExperiments` contains different numerical experiments that has been done:
+** In particular in `NumericalExperiments\FeasibleMap`,  
 ```
 code blocks for commands
 ```
