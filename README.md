@@ -11,7 +11,7 @@ This project explore two multiparameter continuation methods applied to systems 
 
 You will need to download the library `pymanopt` which can be found [here](https://www.pymanopt.org/) as well as the library `autograd` [here](https://github.com/HIPS/autograd).
 
-### Executing program
+### Code description
 
 * The folder `Continuation` contains all the files required to perform the multiparameter continuation. The prediction on the solution manifold's tangent space is performed either using the hessian of a related cost function, or the differential of the system (please refer to PdM report for more details). The class `PathAdaptiveMultiParameterContinuation` which performs the ellipsoid method can be found in the file `Continuation\PositioningProblem\PerturbationWithDifferential\PathAdaptiveContinuation.py`.
 * The folder `Helpers` contains basic SE(3) transformations as well as methods to express linear operators in basis of SE(3) x R^N.
