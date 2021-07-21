@@ -3,14 +3,13 @@ This project is meant to be used as a prototype for a multiparameter continuatio
 
 ## Description
 
-This project explore two multiparameter continuation methods applied to
-systems of equations with manifolds constraints on $`\sqrt{2}`$.  <img src="https://latex.codecogs.com/gif.latex?SE(3)" />. The methods are applied
-on two positioning problems with an implementation in Python, using the library Pymanopt.
+This project explore two multiparameter continuation methods applied to systems of equations with manifolds constraints. The methods are applied on two positioning problems with an implementation in Python, using the library Pymanopt.
 
 ## Getting Started
 
 ### Dependencies
 
+You will need to download the library 'pymanopt' which can be found [here](https://www.pymanopt.org/).
 * Describe any prerequisites, libraries, OS version, etc., needed before installing program.
 * ex. Windows 10
 
