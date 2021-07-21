@@ -13,43 +13,9 @@ You will need to download the library `pymanopt` which can be found [here](https
 
 ### Executing program
 
-* How to run the program
+* The folder `Continuation` contains all the files required to perform the multiparameter continuation. The prediction on the solution manifold's tangent space is performed either using the hessian of a related cost function, or the differential of the system (please refer to PdM report for more details). The class `PathAdaptiveMultiParameterContinuation` which performs the ellipsoid method can be found in the file `Continuation\PositioningProblem\PerturbationWithDifferential\PathAdaptiveContinuation.py`.
+* The folder `Helpers` contains basic SE(3) transformations as well as methods to express linear operators in basis of SE(3) x R^N.
 * Step-by-step bullets
 ```
 code blocks for commands
 ```
-
-## Help
-
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
-
-## Authors
-
-Contributors names and contact info
-
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
-
-## Version History
-
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
-
-## License
-
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
-
-## Acknowledgments
-
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
