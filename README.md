@@ -9,7 +9,7 @@ This project explore two multiparameter continuation methods applied to systems 
 
 ### Dependencies
 
-You will need to download the library 'pymanopt' which can be found [here](https://www.pymanopt.org/).
+You will need to download the library `pymanopt` which can be found [here](https://www.pymanopt.org/).
 * Describe any prerequisites, libraries, OS version, etc., needed before installing program.
 * ex. Windows 10
 
