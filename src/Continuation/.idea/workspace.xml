@@ -2,30 +2,44 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4bbff35-ca04-4b09-a879-5099a7283e14" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/PositioningProblem/OldContinuation/PathAdaptiveStepSizeAdaptiveContinuation2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationApproximateLength.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationSecondOrderApproximation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PositioningProblem/StepSizeAdaptiveContinuationStraightLine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Derivatives/Parabola.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Helpers/BasicSE3Transformations.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Helpers/BasicSe3Transformation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Helix.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Parabola.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Torus.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../TestsNotebook/testReliefTwoCurves.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/CylinderVisualization.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/SurfaceVisualization.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/TorusVisualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Continuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/Continuation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Helpers/AssembleMatrices.py" beforeDir="false" afterPath="$PROJECT_DIR$/Helpers/AssembleMatrices.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MethodForPerturbation.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/PositioningProblem/ContinuationPositioning.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/ContinuationPositioning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationPositioning.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/OldContinuation/PathAdaptiveContinuationPositioning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveContinuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveContinuation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveHessianContinuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/PositioningProblem/OldContinuation/PathAdaptiveStepSizeAdaptiveHessianContinuation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/DifferentialF/PathAdaptiveContinuation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationApproximateLength.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveContinuationSecondOrderApproximation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/PathAdaptiveStepSizeAdaptiveContinuation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PositioningProblem/StepSizeAdaptiveContinuationStraightLine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Metrics4AtBorder.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Metrics5AtBorder.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Metrics6AtBorder.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SE3Parameterizations/Derivatives/differentialSE3F.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Helix.py" beforeDir="false" afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Helix.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Torus.py" beforeDir="false" afterPath="$PROJECT_DIR$/../SE3Parameterizations/Parameterizations/Torus.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Solver/SolverRBFGSPositioning.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Solver/SolverRBFGSPositioning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../TestsNotebook/Debugging.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/Debugging.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../TestsNotebook/FeasableMap.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/FeasableMap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/.idea/.name" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/Metrics1AtBorder.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/Metrics2AtBorder.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/MetricsAtBorder.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/PlotMetricAxesAtBorder.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/PlotMetricAxesAtBorder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/ReadFeasableMap.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/ReadFeasableMap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/data.dat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/data.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/data2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/dataPosLine.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/test.npy" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblem.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblem.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblemStandardContinuation.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblemStandardContinuation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblem2.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/testPositioningProblem2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../TestsNotebook/testReliefTwoCurves.py" beforeDir="false" afterPath="$PROJECT_DIR$/../TestsNotebook/testReliefTwoCurves.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Visualization/Parameterizations/Curves/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Curves/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/TorusVisualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Visualization/Parameterizations/Surfaces/TorusVisualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../dataNegEllipsoid.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,5 +81,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

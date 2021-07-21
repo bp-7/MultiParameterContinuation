@@ -29,6 +29,7 @@ class GLTR:
 
         self.iter = None
 
+        self.maxInnerIterations = np.sum(self.Dmu.shape)
         self.MaximumIteration = np.sum(self.Dmu.shape)
 
     def EvaluateInverseMetric(self, v):
@@ -42,9 +43,6 @@ class GLTR:
         X = scipy.linalg.lu_solve(lu_and_piv, rhs)
 
         return X[:parameterSpaceDimension]
-
-    def ContinueOptimization(self):
-        return True
 
     def pcgOneIteration(self):
         alphak = np.dot(self.gk, self.vk) / np.dot(self.pk, self.pk)
@@ -66,24 +64,27 @@ class GLTR:
 
     def SolveTridiagonalTRS(self):
         maxiter = 200
-        #Need to find initial value
+        #Need to find suitable initial value
         lambdak = 0
         I = np.eye(self.iter + 1)
+        res = np.inf
+        innerIteration = 0
 
-        while res >= 1.e-10:
-            B, eigvals = np.linalg.eig(self.Tj + lambdak * I)
+        while res >= 1.e-10 and innerIteration < self.maxInnerIterations:
+            B, eigvals = np.linalg.eig(self.Tk + lambdak * I)
             D = np.diag(eigvals)
             Dinv = np.linalg.inv(D)
 
-            h = - self.gamma0 * B @ Dinv @ B.T @ I[0]
+            h = - self.gammak * B @ Dinv @ B.T @ I[0]
             w = B.T @ h
 
             lambdak = lambdak - 1. / (self.radius * w.T @ Dinv @ w.T) * (self.radius - np.linalg.norm(h)) * np.linalg.norm(h) ** 2
 
-            def phi(_lambda):
-                return 1. / np.norm(h) - 1. / self.radius
+            phi_lambdak = 1. / np.norm(h) - 1. / self.radius
 
-            res = np.abs(phi(lambdak))
+            res = np.abs(phi_lambdak)
+
+            innerIteration = innerIteration + 1
 
     def EvaluateMetricNormTerm(self):
         pkMpk = np.dot(self.gk, self.vk) if self.iter == 0 else np.dot(self.gk, self.vk) + self.betaPrev ** 2 * self.pkMpkPrev
@@ -115,9 +116,9 @@ class GLTR:
             vNext = self.EvaluateInverseMetric(gNext)
 
             if self.INTERIOR:
-                TestConvergence()
+                self.TestConvergence()
             else:
-                TestConvergence()
+                self.TestConvergence()
 
             self.betak = np.dot(gNext, vNext) / np.dot(self.gk, self.vk)
             pNext = - vNext + self.betak * self.pk
@@ -128,9 +129,14 @@ class GLTR:
 
             self.iter += self.iter
 
-        if self.INTERIOR == False:
+        if not self.INTERIOR:
             self.sk = self.Qk @ self.hk
 
+    def ContinueOptimization(self):
+        return True
+
+    def TestConvergence(self):
+        raise NotImplementedError
 
 
 

@@ -6,13 +6,13 @@ class SolverRBFGS:
     ArmijoPromisedDecreaseScaling = 1e-4
     ArmijoStepSizeContraction = 0.7
     ArmijoInitialStepSize = 1
-    ObjectiveFunctionTolerance = 1e-14
-    GradientNormTolerance = 1e-10
+    ObjectiveFunctionTolerance = 1e-12
+    GradientNormTolerance = 1e-8
     SE3Dimension = 6
 
     def __init__(self, problem, normalized = False):
         if not isinstance(problem, Problem):
-            raise ValueError('The problem must be an instance of pymanopt.core.problem.Problem')
+            raise ValueError('The problem must be an instance of pymanopt.core.problem.TestCases')
 
         self._solutionSpace = problem.manifold
         self._objectiveFunction = problem.cost
@@ -20,8 +20,8 @@ class SolverRBFGS:
 
         self.normalized = normalized
 
-    def ContinueOptimization(self, currentPoint, iterations):
-        return (self._solutionSpace.norm(currentPoint, self._gradient(currentPoint)) > self.GradientNormTolerance
+    def ContinueOptimization(self, currentPoint, currentGradient, iterations):
+        return (self._solutionSpace.norm(currentPoint, currentGradient) > self.GradientNormTolerance
                 and self._objectiveFunction(currentPoint) > self.ObjectiveFunctionTolerance) \
                and iterations < self.MaxIterations #before was or then and
 
@@ -31,7 +31,7 @@ class SolverRBFGS:
         currentStepSize = self.ArmijoInitialStepSize
 
         def armijoCondition(stepSize):
-            return self._objectiveFunction(self._solutionSpace.retr(currentPoint, stepSize * searchDirection)) > fCurrentPoint \
+            return self._objectiveFunction(self._solutionSpace.exp(currentPoint, [stepSize * SearchDirection for SearchDirection in searchDirection])) > fCurrentPoint \
                    + stepSize * self.ArmijoPromisedDecreaseScaling * promisedDecrease
 
         while armijoCondition(currentStepSize) and currentStepSize > 1e-10:
@@ -52,11 +52,12 @@ class SolverRBFGS:
         print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
         print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
 
-        while self.ContinueOptimization(currentPoint, iterations):
+        while self.ContinueOptimization(currentPoint, currentGradient, iterations):
             iterations = iterations + 1
 
             stepSize = self.ArmijoLineSearch(currentPoint, currentGradient, updateDirection)
-            newPoint = self._solutionSpace.exp(currentPoint, stepSize * updateDirection)
+            newPoint = self._solutionSpace.exp(currentPoint,
+                                               [stepSize * UpdateDirection for UpdateDirection in updateDirection])
 
             previousGradient = currentGradient
             newGradient = self._gradient(newPoint)
@@ -65,16 +66,18 @@ class SolverRBFGS:
                 approximateInverseHessian,
                 newGradient,
                 previousGradient,
-                stepSize * updateDirection)
+                [stepSize * UpdateDirection for UpdateDirection in updateDirection])
 
-            updateDirection = self.ConvertToTangentVector(currentPoint, -approximateInverseHessian @ self.ConvertToVectorInRn(newGradient))
+            updateDirection = self.ConvertToTangentVector(
+                currentPoint,
+                -approximateInverseHessian @ self.ConvertToVectorInRn(newGradient))
 
             currentPoint = newPoint
 
             currentGradient = newGradient
 
-            print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
-            print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
+            # print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
+            # print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
 
         print("f_" + str(iterations) + " = " + str(self._objectiveFunction(currentPoint)))
         print("|gradf_" + str(iterations) + "| = " + str(self._solutionSpace.norm(currentPoint, currentGradient)))
@@ -90,7 +93,6 @@ class SolverRBFGS:
         yk = self.ConvertToVectorInRn(currentGradient) - self.ConvertToVectorInRn(previousGradient)
         sk = self.ConvertToVectorInRn(previousSearchDirection)
 
-        #For the moment
         if self.normalized:
             metricMatrix = np.eye(int(self._solutionSpace.dim))
         else:
@@ -107,12 +109,13 @@ class SolverRBFGS:
 
         intermediateScalar = inner(sk, yk) + inner(yk , oldInverseHessian @ yk)
 
-        if skTGyk < 1e-12:# and np.linalg.norm(oldInverseHessian - np.eye(int(self._solutionSpace.dim))) >= 1e-14 :
+        if skTGyk < 1e-11:# and np.linalg.norm(oldInverseHessian - np.eye(int(self._solutionSpace.dim))) >= 1e-14 :
             return np.eye(int(self._solutionSpace.dim))
+        skTG = sk.T @ metricMatrix
 
         return oldInverseHessian \
-               + np.outer(sk, sk.T @ metricMatrix) * intermediateScalar / (skTGyk * skTGyk)\
-               - (np.outer(oldInverseHessian @ yk, sk.T @ metricMatrix)
+               + np.outer(sk, skTG) * intermediateScalar / (skTGyk * skTGyk)\
+               - (np.outer(oldInverseHessian @ yk, skTG)
                   + np.outer(sk, yk.T @ metricMatrix) @ oldInverseHessian) / skTGyk
 
     def ConvertToVectorInRn(self, tangentVector):
@@ -126,10 +129,10 @@ class SolverRBFGS:
         if self.normalized:
             return self._solutionSpace.proj(currentPoint, (self.Skew(vector[:3]) / np.sqrt(2.), vector[3:6], vector[6:]))
         else:
-            return self._solutionSpace.proj(currentPoint, (self.Skew(vector[:3]), vector[3:6], vector[6:]))
+            return [self.Skew(vector[:3]), vector[3:6], vector[6:]]
 
     def Skew(self, w):
         return np.array([[0., -w[2], w[1]], [w[2], 0., -w[0]], [-w[1], w[0], 0.]])
 
     def InvSkew(self, S):
-            return np.array([S[2, 1], S[0, 2], S[1, 0]])
+        return np.array([S[2, 1], S[0, 2], S[1, 0]])

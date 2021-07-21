@@ -8,7 +8,6 @@ class SurfaceVisualization:
         self.color = color
         self.opacity = opacity
 
-        # self.SE3Transformation = SE3Transformation
         self.rotationTransformation = SE3Transformation[:3, :3]
         self.translationTransformation = SE3Transformation[:3, 3]
 

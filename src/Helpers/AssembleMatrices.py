@@ -1,4 +1,5 @@
 import numpy as np
+from Helpers.MathHelpers import Skew
 
 def WriteMatrixInEuclideanBasisAtGivenPoint(matrixVectorFunction, x, mu, dimension):
     spaceDimension = len(x)
@@ -13,9 +14,6 @@ def WriteMatrixInEuclideanBasisAtGivenPoint(matrixVectorFunction, x, mu, dimensi
 
     return A
 
-def Skew(w):
-    return np.array([[0., -w[2], w[1]], [w[2], 0., -w[0]], [-w[1], w[0], 0.]])
-
 def ConstructNormalizedTotalBasisForBergerManifold(N):
     I3 = np.eye(3)
     IN = np.eye(N)
@@ -28,25 +26,6 @@ def ConstructNormalizedTotalBasisForBergerManifold(N):
     RNBasisPart = [[np.zeros((3, 3)), np.zeros(3), w, np.zeros(2)] for w in IN]
 
     RPBasisPart = [[np.zeros((3, 3)), np.zeros(3), np.zeros(3), w] for w in IP]
-
-    basis = [SO3BasisPart, R3BasisPart, RNBasisPart, RPBasisPart]
-
-    basisRearranged = [item for sublist in basis for item in sublist]
-
-    return basisRearranged
-
-def ConstructTotalBasisForBergerManifold(N):
-    I3 = np.eye(3)
-    IN = np.eye(N)
-    IP = np.eye(2)
-
-    SO3BasisPart = [[Skew(w), np.zeros(3), np.zeros(N), np.zeros(2)] for w in I3]
-
-    R3BasisPart = [[np.zeros((3, 3)), w, np.zeros(N), np.zeros(2)] for w in I3]
-
-    RNBasisPart = [[np.zeros((3, 3)), np.zeros(3), w, np.zeros(2)] for w in IN]
-
-    RPBasisPart = [[np.zeros((3, 3)), np.zeros(3), np.zeros(N), w] for w in IP]
 
     basis = [SO3BasisPart, R3BasisPart, RNBasisPart, RPBasisPart]
 
@@ -79,22 +58,6 @@ def RepresentSquareOperatorInTotalBergerBasis(operator, manifold, point):
             A[i, j] = manifold.inner(point, operatorResults[j], basis[i]) / temp
 
     return A
-
-def ConstructBasisForBergerManifold(N):
-    I3 = np.eye(3)
-    IN = np.eye(N)
-
-    SO3BasisPart = [[Skew(w), np.zeros(3), np.zeros(N)] for w in I3]
-
-    R3BasisPart = [[np.zeros((3, 3)), w, np.zeros(N)] for w in I3]
-
-    RNBasisPart = [[np.zeros((3, 3)), np.zeros(3), w] for w in IN]
-
-    basis = [SO3BasisPart, R3BasisPart, RNBasisPart]
-
-    basisRearranged = [item for sublist in basis for item in sublist]
-
-    return basisRearranged
 
 def ConstructMetricMatrixForBergerManifold(N):
     basis = ConstructBasisForBergerManifold(N)
@@ -134,4 +97,98 @@ def RepresentRectangularOperatorFromEuclideanToBergerManifold(operator, manifold
 
     return A
 
+############################################################
 
+def ConstructBasisSE3Manifold2():
+    I3 = np.eye(3)
+
+    SO3BasisPart = [[Skew(w), np.zeros(3), np.zeros((3, 3)), np.zeros(3)] for w in I3]
+
+    R3BasisPart = [[np.zeros((3, 3)), w, np.zeros((3, 3)), np.zeros(3)] for w in I3]
+
+    SO3BasisPart2 = [[np.zeros((3, 3)), np.zeros(3), Skew(w), np.zeros(3)] for w in I3]
+
+    R3BasisPart2 = [[np.zeros((3, 3)), np.zeros(3), np.zeros((3, 3)), w] for w in I3]
+
+    basis = [SO3BasisPart, R3BasisPart, SO3BasisPart2, R3BasisPart2]
+
+    basisRearranged = [item for sublist in basis for item in sublist]
+
+    return basisRearranged
+
+def ConstructTotalBasisForBergerManifold(N, parameterSpaceDimension):
+    I3 = np.eye(3)
+    IN = np.eye(N)
+    IP = np.eye(parameterSpaceDimension)
+
+    SO3BasisPart = [[Skew(w), np.zeros(3), np.zeros(N), np.zeros(parameterSpaceDimension)] for w in I3]
+
+    R3BasisPart = [[np.zeros((3, 3)), w, np.zeros(N), np.zeros(parameterSpaceDimension)] for w in I3]
+
+    RNBasisPart = [[np.zeros((3, 3)), np.zeros(3), w, np.zeros(parameterSpaceDimension)] for w in IN]
+
+    RPBasisPart = [[np.zeros((3, 3)), np.zeros(3), np.zeros(N), w] for w in IP]
+
+    basis = [SO3BasisPart, R3BasisPart, RNBasisPart, RPBasisPart]
+
+    basisRearranged = [item for sublist in basis for item in sublist]
+
+    return basisRearranged
+
+def ConstructBasisForBergerManifold(N):
+    I3 = np.eye(3)
+    IN = np.eye(N)
+
+    SO3BasisPart = [[Skew(w), np.zeros(3), np.zeros(N)] for w in I3]
+
+    R3BasisPart = [[np.zeros((3, 3)), w, np.zeros(N)] for w in I3]
+
+    RNBasisPart = [[np.zeros((3, 3)), np.zeros(3), w] for w in IN]
+
+    basis = [SO3BasisPart, R3BasisPart, RNBasisPart]
+
+    basisRearranged = [item for sublist in basis for item in sublist]
+
+    return basisRearranged
+
+def RepresentRectangularOperatorFromSolutionSpaceToSE32(operator, startingManifold, arrivalManifold, point, Fpoint):
+    startingDimension = int(startingManifold.dim)
+    arrivalDimension = int(arrivalManifold.dim)
+    arrivalBasis = ConstructBasisSE3Manifold2()
+    bergerBasis = ConstructBasisForBergerManifold(startingDimension - 6)
+    A = np.empty((arrivalDimension, startingDimension))
+    operatorResults = [operator(point, w) for w in bergerBasis]
+    for i in range(arrivalDimension):
+        temp = arrivalManifold.inner(Fpoint, arrivalBasis[i], arrivalBasis[i])
+        for j in range(startingDimension):
+            A[i, j] = arrivalManifold.inner(Fpoint, operatorResults[j], arrivalBasis[i]) / temp
+
+    return A
+
+def RepresentRectangularOperatorFromTotalSpaceToSE32(operator, startingManifold, arrivalManifold, point, Fpoint, parameterSpaceDimension):
+    startingDimension = int(startingManifold.dim)
+    arrivalDimension = int(arrivalManifold.dim)
+    arrivalBasis = ConstructBasisSE3Manifold2()
+    bergerBasis = ConstructTotalBasisForBergerManifold(startingDimension - 6 - parameterSpaceDimension, parameterSpaceDimension)
+    A = np.empty((arrivalDimension, startingDimension))
+    operatorResults = [operator(point, w) for w in bergerBasis]
+    for i in range(arrivalDimension):
+        temp = arrivalManifold.inner(Fpoint, arrivalBasis[i], arrivalBasis[i])
+        for j in range(startingDimension):
+            A[i, j] = arrivalManifold.inner(Fpoint, operatorResults[j], arrivalBasis[i]) / temp
+
+    return A
+
+def RepresentRectangularOperatorFromParameterSpaceToSE32(operator, startingManifold, arrivalManifold, point, Fpoint):
+    startingDimension = int(startingManifold.dim)
+    arrivalDimension = int(arrivalManifold.dim)
+    arrivalBasis = ConstructBasisSE3Manifold2()
+    startingBasis = np.eye(startingDimension)
+    A = np.empty((arrivalDimension, startingDimension))
+    operatorResults = [operator(point, w) for w in startingBasis]
+    for i in range(arrivalDimension):
+        temp = arrivalManifold.inner(Fpoint, arrivalBasis[i], arrivalBasis[i])
+        for j in range(startingDimension):
+            A[i, j] = arrivalManifold.inner(Fpoint, operatorResults[j], arrivalBasis[i]) / temp
+
+    return A
