@@ -17,7 +17,7 @@ You will need to download the library `pymanopt` which can be found [here](https
 * The folder `Helpers` contains basic SE(3) transformations as well as methods to express linear operators in basis of SE(3) x R^N.
 * The folder `PositioiningProblems` defines the different studied problems, as well as a related cost function and the system's differential for each problem.
 * The folder `NumericalExperiments` contains different numerical experiments that has been done:
-** In particular in `NumericalExperiments\FeasibleMap`,  
+  * In particular in `NumericalExperiments\FeasibleMap`,  
 ```
 code blocks for commands
 ```
